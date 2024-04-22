@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "backend-pipeline-message"
+version = "0.1.0"
+description = ""
+authors = ["Alejandro Amar Gil <alejandroamar66@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.110.1"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+redis = "^5.0.3"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.29"}
+pydantic = "^2.7.0"
+python-multipart = "^0.0.9"
+fastapi-login = "^1.10.0"
+pydantic-settings = "^2.2.1"
+loguru = "^0.7.2"
+asyncpg = "^0.29.0"
+psycopg2-binary = "^2.9.9"
+psycopg = "^3.1.18"
+alembic = "^1.13.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
