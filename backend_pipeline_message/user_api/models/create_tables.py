@@ -1,5 +1,7 @@
+from utils.database.async_database import sessionmanager
+
+
 from .user import Base
-from .utils.database.async_database import sessionmanager
 
 
 async def create_tables():

@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+
+from routers.auth import auth_router
 from routers.user import router as user
 from utils.database.async_database import sessionmanager
 from utils.fastapi.exceptions import exceptions_user, general
@@ -36,6 +38,7 @@ app.add_middleware(
 )
 
 app.include_router(user)
+app.include_router(auth_router)
 
 app.add_exception_handler(
 	exc_class_or_status_code=exceptions_user.EntityDoesNotExistError,
@@ -70,6 +73,13 @@ app.add_exception_handler(
 
 app.add_exception_handler(
 	exc_class_or_status_code=exceptions_user.LoginError,
+	handler=exceptions_user.create_exception_handler(
+		status_code=status.HTTP_401_UNAUTHORIZED, initial_detail="Invalid credentials."
+	),
+)
+
+app.add_exception_handler(
+	exc_class_or_status_code=exceptions_user.InvalidCredentialsError,
 	handler=exceptions_user.create_exception_handler(
 		status_code=status.HTTP_401_UNAUTHORIZED, initial_detail="Invalid credentials."
 	),

@@ -1,11 +1,13 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import DateTime, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .utils.database.async_database import Base
-from .utils.database.general import MixInNameTable
+from schemas.user import Roles
+from utils.database.async_database import Base
+from utils.database.general import MixInNameTable
 
 
 class User(Base, MixInNameTable):
@@ -24,6 +26,16 @@ class User(Base, MixInNameTable):
 	role: Mapped[Roles] = mapped_column(
 		Enum(Roles), nullable=False, default=Roles.user, index=True
 	)
-	created_at: Mapped[DateTime] = mapped_column(nullable=False, index=True)
-	updated_at: Mapped[DateTime] = mapped_column(nullable=False, index=True)
+	created_at: Mapped[datetime] = mapped_column(
+		DateTime(timezone=True), nullable=False, index=True
+	)
+	updated_at: Mapped[datetime] = mapped_column(
+		DateTime(timezone=True), nullable=False, index=True, onupdate=datetime.now
+	)
 	hashed_password: Mapped[str] = mapped_column(nullable=False)
+	city: Mapped[str] = mapped_column(nullable=True, default=None)
+	street: Mapped[str] = mapped_column(nullable=True, default=None)
+	country: Mapped[str] = mapped_column(nullable=True, default=None)
+	state: Mapped[str] = mapped_column(nullable=True, default=None)
+	zip_code: Mapped[int] = mapped_column(nullable=True, default=None)
+	phone: Mapped[int] = mapped_column(nullable=True, default=None)
