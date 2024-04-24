@@ -29,6 +29,7 @@ class UserBase(BaseModel):
 	state: str | None = None
 	zip_code: int | None = None
 	phone: str | None = None
+	activation_key: str | None = None
 
 	model_config = {
 		"json_schema_extra": {
@@ -48,6 +49,7 @@ class UserBase(BaseModel):
 					"state": None,
 					"zip_code": None,
 					"phone": None,
+					"activation_key": "12345678",
 				}
 			]
 		}
@@ -120,3 +122,34 @@ class UpdatePassword(BaseModel):
 		if pw1 is not None and pw2 is not None and pw1 != pw2:
 			raise ValueError("passwords do not match")
 		return self
+
+	model_config = {
+		"json_schema_extra": {
+			"examples": [
+				{
+					"email": "jhondoe@example.com",
+					"username": "jhondoe",
+					"name": "Jhon",
+					"last_name": "Doe",
+					"is_active": False,
+					"role": Roles.user.name,
+					"created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+					"updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+					"city": None,
+					"street": None,
+					"country": None,
+					"state": None,
+					"zip_code": None,
+					"phone": None,
+					"old_password": "12345678",
+					"new_password": "12345678",
+				}
+			]
+		}
+	}
+
+
+class ActivateUser(BaseModel):
+	is_active: bool
+	id: UUID4
+	activation_key: str

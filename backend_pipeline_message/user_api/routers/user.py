@@ -1,12 +1,11 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path, status
-from pydantic import SecretStr
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from crud.user import user_crud
+from fastapi import APIRouter, Depends, Path, status
+from fastapi.responses import JSONResponse
 from models.user import User as user_model
+from pydantic import SecretStr
 
 # from models.user import User
 from schemas.user import (
@@ -16,6 +15,7 @@ from schemas.user import (
 	UpdatePassword,
 	User,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
 from utils.database.async_database import get_db_session
 from utils.fastapi.auth.utils import hash_password
 from utils.fastapi.exceptions.exceptions_user import InvalidCredentialsError
@@ -98,6 +98,28 @@ async def update_user(
 	)
 
 
+@router.get("/generate_activation_key/{user_id}", status_code=status.HTTP_200_OK)
+async def generate_activation_key(
+	user_id: UUID,
+	user: ResponseUser = Depends(manager),
+	db: AsyncSession = Depends(get_db_session),
+) -> JSONResponse:
+	# TODO: Send this url to mail
+	if user.id != user_id:
+		raise InvalidCredentialsError(
+			message="You don't have permission to generate the key"
+		)
+	if user.is_active:
+		raise InvalidCredentialsError(message="The user is already active")
+	activate_user = await user_crud.generate_key(user_id, db)
+	return JSONResponse(
+		content={
+			"url": f"http://localhost/user/activate/{activate_user.id}/{activate_user.activation_key}"
+		},
+		status_code=status.HTTP_200_OK,
+	)
+
+
 # TODO: Add route for activate the user (is_active)
 @router.get("/activate/{user_id}/{key}", status_code=status.HTTP_200_OK)
 async def activate_user(
@@ -108,8 +130,10 @@ async def activate_user(
 	user = await user_crud.get_user_by_id(user_id, db)
 	# TODO: Consult db to know if the key is active or is already use
 	if user.is_active:
-		return None
-	await user_crud.activate_user(user_id, db)
+		raise InvalidCredentialsError(message="You already activate the user")
+	if user.activation_key != key:
+		raise InvalidCredentialsError(message="Invalid key")
+	await user_crud.activate_user(user, db)
 
 
 # TODO: Create a route to send a mail to activate the user

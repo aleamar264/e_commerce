@@ -1,12 +1,11 @@
 from typing import Sequence, override
-from uuid import UUID
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID, uuid4
 
 from models.user import User
-from schemas.user import UpdateOtherFields, UpdatePassword
+from schemas.user import ActivateUser, UpdateOtherFields, UpdatePassword
 from schemas.user import User as user_create
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from utils.database.crud.general import GeneralCrudAsync
 from utils.fastapi.auth.utils import hash_password
 from utils.fastapi.exceptions.exceptions_user import (
@@ -99,12 +98,20 @@ class UserCrudAsync(GeneralCrudAsync[User]):
 		return user_to_update
 
 	@override
-	async def activate_user(self, user_id: UUID, db: AsyncSession):
-		user_ = await self.get_user_by_id(user_id, db)
-		setattr(user_, "is_active", True)
+	async def activate_user(self, user: User, db: AsyncSession):
+		setattr(user, "is_active", True)
 		await db.commit()
-		await db.refresh(user_)
-		return user_
+		await db.refresh(user)
+		return None
+
+	async def generate_key(self, user_id: UUID, db: AsyncSession) -> ActivateUser:
+		user = await self.get_user_by_id(user_id, db)
+		setattr(user, "activation_key", uuid4().hex.upper())
+		await db.commit()
+		await db.refresh(user)
+		return ActivateUser(
+			is_active=user.is_active, id=user.id, activation_key=user.activation_key
+		)
 
 
 user_crud = UserCrudAsync()

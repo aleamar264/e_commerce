@@ -1,11 +1,10 @@
 import uuid
 from datetime import datetime
 
+from schemas.user import Roles
 from sqlalchemy import DateTime, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
-
-from schemas.user import Roles
 from utils.database.async_database import Base
 from utils.database.general import MixInNameTable
 
@@ -39,3 +38,4 @@ class User(Base, MixInNameTable):
 	state: Mapped[str] = mapped_column(nullable=True, default=None)
 	zip_code: Mapped[int] = mapped_column(nullable=True, default=None)
 	phone: Mapped[int] = mapped_column(nullable=True, default=None)
+	activation_key: Mapped[str] = mapped_column(nullable=True, default=None)
