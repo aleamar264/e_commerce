@@ -1,0 +1,85 @@
+version: '3.8'
+
+networks:
+  backend:
+    external: true
+      
+volumes:
+  db_data:
+
+services:
+  db:
+    image: postgres:14.1-alpine
+    hostname: pg
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+    volumes: 
+      - db_data:/var/lib/postgresql/data
+      - ./data:/tmp/
+    networks:
+      - backend
+  
+  users:
+    build:
+      context: .
+      dockerfile: Dockerfile_user
+    env_file:
+      - backend_pipeline_message/user_api/.secret.env
+      - backend_pipeline_message/user_api/.database.env
+    command: /start
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    networks:
+      - backend
+    
+  
+  task_managment:
+    build:
+      context: .
+      dockerfile: Dockerfile_tasks
+    command: /start
+    env_file:
+      - backend_pipeline_message/task_management/.secret.env
+      - backend_pipeline_message/task_management/.database.env
+    ports:
+      - 8001:8001
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  debezium:
+    extends:
+      file: debezium.yml
+      service: debezium
+
+  debezium-ui:
+    extends:
+      file: debezium.yml
+      service: debezium-ui
+
+  broker:
+    extends:
+      file: kafka.yml
+      service: broker
+  
+  zookeeper:
+    extends:
+      file: kafka.yml
+      service: zookeeper
+
+  schema-registry:
+    extends:
+      file: kafka.yml
+      service: schema-registry
+  
+  control-center:
+    extends:
+      file: kafka.yml
+      service: control-center

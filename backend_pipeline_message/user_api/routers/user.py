@@ -2,7 +2,7 @@ from typing import Sequence
 from uuid import UUID
 
 from crud.user import user_crud
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import APIRouter, Depends, Path, Response, status
 from fastapi.responses import JSONResponse
 from models.user import User as user_model
 from pydantic import SecretStr
@@ -49,6 +49,7 @@ async def signup(user: CreateUser, db: AsyncSession = Depends(get_db_session)):
 		hashed_password=SecretStr(password),
 	)
 	await user_crud.create_user(user_, db)
+	# TODO: Send signal to task managment API to exrtact id, ....
 
 
 @router.delete("/delete/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -137,3 +138,9 @@ async def activate_user(
 
 
 # TODO: Create a route to send a mail to activate the user
+
+
+@router.get("/logout", status_code=status.HTTP_200_OK)
+async def logout(response: Response, user: ResponseUser = Depends(manager)):
+	manager.set_cookie(response, None)
+	return JSONResponse(content={"message": "Logged out"})
