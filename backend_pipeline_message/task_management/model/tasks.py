@@ -14,6 +14,7 @@ class User(Base, MixInNameTable):
 	)
 	username: Mapped[str] = mapped_column(nullable=False, index=True, unique=True)
 	is_active: Mapped[bool] = mapped_column(default=False)
+	role: Mapped[str] = mapped_column(nullable=False)
 	tasks: Mapped[list["Tasks"]] = relationship(back_populates="user")
 
 
@@ -31,7 +32,6 @@ class Tasks(Base, MixInNameTable):
 		ForeignKey("user.id"),
 		nullable=True,
 		index=True,
-		unique=True,
 	)
 	user: Mapped["User"] = relationship(back_populates="tasks")
 	created_at: Mapped[datetime] = mapped_column(

@@ -11,12 +11,17 @@ class Task(BaseModel):
 	created_at: datetime
 	description: str
 	is_completed: bool
+	updated_at: datetime
 
 
 class User(BaseModel):
 	id: UUID4
 	role: str
 	username: str
+	is_active: bool
+
+
+class UserResponse(User):
 	tasks: list[Task]
 
 
@@ -26,6 +31,14 @@ class TaskType:
 	name: str
 	user_id: UUID4
 	created_at: datetime
+	description: str
+	is_completed: bool
+	updated_at: datetime
+
+
+@strawberry.input
+class TaskUpdateInput:
+	name: str
 	description: str
 	is_completed: bool
 

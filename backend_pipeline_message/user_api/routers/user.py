@@ -50,7 +50,7 @@ async def signup(user: CreateUser, db: AsyncSession = Depends(get_db_session)):
 	)
 	await user_crud.create_user(user_, db)
 	# TODO: Send signal to task managment API to exrtact id, ....
-
+	
 
 @router.delete("/delete/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(

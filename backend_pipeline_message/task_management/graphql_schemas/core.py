@@ -9,6 +9,7 @@ from .controller import CreateMutation, Queries
 @strawberry.type
 class Mutation:
 	add_tasks: TaskType = strawberry.mutation(resolver=CreateMutation.add_task)
+	update_tasks: TaskType = strawberry.mutation(resolver=CreateMutation.update_task)
 
 
 @strawberry.type
